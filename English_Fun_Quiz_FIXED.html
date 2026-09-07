@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Fun Quiz</title>
+<style>
+body{margin:0;background:#f2f7ff;font-family:Arial,sans-serif;color:#17324d}
+.wrap{max-width:720px;margin:auto;padding:16px}
+.card{background:white;border-radius:22px;padding:22px;box-shadow:0 8px 28px rgba(0,0,0,.10)}
+h1{margin:0 0 6px} .muted{color:#6b7d8d}
+.top{display:flex;justify-content:space-between;margin:18px 0 10px;font-weight:bold}
+.bar{height:9px;background:#e6edf4;border-radius:9px;overflow:hidden} .fill{height:100%;background:#4b91ff}
+.question{font-size:23px;font-weight:700;line-height:1.35;margin-top:25px}
+.hint{margin:7px 0 16px;color:#71808d}
+.option{display:flex;align-items:center;gap:12px;width:100%;padding:15px;margin:10px 0;border:2px solid #dce5ee;border-radius:14px;background:#fff;font-size:17px;text-align:left;cursor:pointer}
+.option.selected{border-color:#4b91ff;background:#eef6ff}
+.letter{min-width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#eaf0f5;font-weight:bold}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+button.next,button.back,button.restart{border:0;border-radius:13px;padding:13px 20px;font-weight:bold;font-size:16px;cursor:pointer}
+button.next,button.restart{background:#4b91ff;color:#fff} button.back{background:#edf1f5;color:#345}
+button:disabled{opacity:.45;cursor:not-allowed}
+.result{text-align:center} .score{font-size:52px;font-weight:bold;margin:15px}
+.wrong{text-align:left;background:#fff1f1;border-radius:12px;padding:12px;margin:8px 0}
+.correct{color:#087443;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card" id="app"></div></div>
+<script>
+const BANK = [["How old are you?", ["I am 7 years old", "I am 9 years old", "I am 12 years old", "I am 5 years old"], 1], ["Where do you live?", ["I live in a city/neighborhood", "I live in a car", "I live at school", "I live on a cloud"], 0], ["What do you like to do in your free time?", ["I like sleeping all day", "I like playing and reading", "I like crying", "I like running away"], 1], ["What is your favorite subject at school?", ["Math or English", "Only sleeping", "Nothing", "None"], 0], ["What color is the sky?", ["Red", "Blue", "Black", "Green"], 1], ["What color is a banana?", ["Yellow", "Purple", "Pink", "Brown"], 0], ["What color is the grass?", ["Green", "White", "Orange", "Yellow"], 0], ["What number comes after 9?", ["Eight", "Ten", "Eleven", "Twenty"], 1], ["How do you say 'عشرون' in English?", ["Ten", "Twelve", "Twenty", "Hundred"], 2], ["What is 5 + 5?", ["Eight", "Nine", "Ten", "Fifteen"], 2], ["What is the king of the jungle?", ["Elephant", "Lion", "Monkey", "Cat"], 1], ["Which animal gives us milk?", ["Cow", "Lion", "Tiger", "Dog"], 0], ["Which animal is the tallest in the world?", ["Cat", "Giraffe", "Rabbit", "Mouse"], 1], ["How do you say 'تفاحة' in English?", ["Banana", "Orange", "Apple", "Grape"], 2], ["What color is a strawberry?", ["Red", "Blue", "Yellow", "Black"], 0], ["Is a banana a fruit?", ["Yes, it is a fruit", "No, it is a car", "No, it is a chair", "No, it is an animal"], 0], ["How do you say 'صباح الخير' in English?", ["Good evening", "Good night", "Good morning", "Goodbye"], 2], ["How do you say 'قلم' in English?", ["Book", "Pen", "Bag", "School"], 1], ["If you have a superpower, what would it be?", ["Flying or being invisible", "Crying", "Sleeping all day", "Running slowly"], 0], ["Are you excited to join our international school?", ["Yes, I am very excited!", "No, I am sad", "I don't know", "Maybe never"], 0], ["What do you call 'أب' in English?", ["Brother", "Father / Dad", "Sister", "Uncle"], 1], ["What do you call 'أم' in English?", ["Mother / Mom", "Aunt", "Grandmother", "Friend"], 0], ["How do you say 'كتاب' in English?", ["Pen", "Bag", "Book", "Desk"], 2], ["How do you say 'مدرسة' in English?", ["School", "Hospital", "Park", "Street"], 0], ["What shape is a ball or the sun?", ["Square", "Triangle", "Circle", "Rectangle"], 2], ["What shape has four equal sides?", ["Square", "Circle", "Star", "Oval"], 0], ["Which is bigger: an elephant or a cat?", ["An elephant", "A cat", "Both are the same", "Neither"], 0], ["What color is the sun?", ["Blue", "Yellow / Orange", "Green", "Black"], 1], ["How many days are there in a week?", ["5 days", "7 days", "10 days", "30 days"], 1], ["What day comes after Monday?", ["Sunday", "Tuesday", "Friday", "Saturday"], 1], ["Which animal can swim and live in water?", ["Fish", "Bird", "Cat", "Horse"], 0], ["Which animal can fly in the sky?", ["Dog", "Lion", "Bird", "Elephant"], 2], ["What do trees and grass need to grow?", ["Water and sun", "Plastic and iron", "Juice and milk", "Darkness"], 0], ["What should you say if someone helps you?", ["No", "Thank you", "Go away", "Why?"], 1], ["If you want someone to excuse you or pass by, what do you say?", ["Excuse me / Please", "Stop", "Hello", "Goodbye"], 0], ["What do you use to see?", ["Ears", "Nose", "Eyes", "Hands"], 2], ["What do you use to hear sounds?", ["Ears", "Eyes", "Mouth", "Feet"], 0], ["How many fingers do you have on one hand?", ["Four", "Five", "Ten", "Six"], 1], ["What do you wear on your feet?", ["Hat", "Shoes and socks", "Shirt", "Gloves"], 1], ["What do you wear on your head when it is sunny?", ["Scarf", "Cap / Hat", "Coat", "Boots"], 1], ["Is it hot or cold in the winter?", ["Hot", "Cold", "Warm", "Sunny"], 1], ["What do we drink when we are thirsty?", ["Water", "Bread", "Rice", "Cheese"], 0], ["Is milk a healthy drink?", ["Yes, very healthy", "No, it is bad", "No, it's a toy", "I don't know"], 0], ["What do you eat for breakfast?", ["Eggs, bread, or milk", "Only rocks", "Nothing", "Car tires"], 0], ["Which animal can hop and has long ears?", ["Cat", "Rabbit", "Lion", "Elephant"], 1], ["Where do fish live?", ["In the sky", "In the trees", "In the water", "On the desk"], 2], ["What shines in the sky at night?", ["The sun", "The moon and stars", "A car", "A school bus"], 1], ["What should you do before eating?", ["Wash your hands", "Run away", "Sleep", "Cry"], 0], ["What should you say when you make a mistake?", ["I am sorry", "Thank you", "Hello", "No"], 0], ["How do you greet your teacher in the morning?", ["Good night", "Good morning, teacher", "Goodbye", "See you later"], 1], ["Where do you sleep at night?", ["In a bed", "On the roof", "In the kitchen", "On the street"], 0], ["Where do we cook food?", ["In the bathroom", "In the kitchen", "In the bedroom", "In the garden"], 1], ["What do you use to open a locked door?", ["A key", "A spoon", "A book", "A pen"], 0], ["Who helps sick people in a hospital?", ["A teacher", "A doctor / nurse", "A driver", "A cook"], 1], ["Who teaches children at school?", ["A teacher", "A police officer", "A firefighter", "A farmer"], 0], ["Who drives a bus?", ["A pilot", "A bus driver", "A chef", "A doctor"], 1], ["How many seasons are there in a year?", ["2", "4", "12", "7"], 1], ["What season is very hot?", ["Winter", "Summer", "Spring", "Autumn"], 1], ["What time do we usually eat dinner?", ["In the morning", "At night", "At noon", "Never"], 1], ["What color is the night?", ["Black / Dark blue", "Red", "Yellow", "Green"], 0], ["What shape has three sides?", ["Triangle", "Square", "Circle", "Rectangle"], 0], ["What color is milk?", ["White", "Pink", "Brown", "Black"], 0], ["What vehicle flies in the sky?", ["Airplane", "Car", "Bicycle", "Boat"], 0], ["What vehicle sails on water?", ["Train", "Ship / Boat", "Car", "Bus"], 1], ["How many wheels does a bicycle have?", ["One", "Two", "Four", "Three"], 1], ["Where do birds build their nests?", ["In trees", "In cars", "Under water", "In computers"], 0], ["What falls from clouds when it rains?", ["Water drops (Rain)", "Fire", "Sand", "Stones"], 0], ["What color is chocolate?", ["Brown", "Pink", "Yellow", "Blue"], 0], ["What do you kick with your foot in a game?", ["A ball", "A book", "A pencil", "A chair"], 0], ["Do you like playing sports? What is your favorite?", ["Football or Basketball", "Sleeping", "Crying", "Nothing"], 0], ["What is the opposite of 'Big'?", ["Small", "Tall", "Hot", "Fast"], 0], ["What is the opposite of 'Hot'?", ["Cold", "Happy", "Sad", "High"], 0], ["What is the opposite of 'Happy'?", ["Sad", "Good", "Fast", "Clean"], 0], ["What do you do with a book?", ["Read it", "Eat it", "Drink it", "Wear it"], 0], ["What do you do with a pencil?", ["Write or draw", "Sleep", "Run", "Swim"], 0], ["What do you do when you are tired?", ["Sleep / Rest", "Run fast", "Jump", "Shout"], 0], ["What should you say when someone gives you a gift?", ["Thank you", "No", "Go", "Stop"], 0], ["How do you feel on your birthday?", ["Happy and excited", "Sad", "Angry", "Afraid"], 0], ["Which one is an animal?", ["Dog", "Table", "Pen", "Apple"], 0], ["Which one is a fruit?", ["Orange", "Chair", "Shoe", "Car"], 0], ["Which one is a school item?", ["Notebook / Book", "Banana", "Lion", "T-shirt"], 0], ["Do you have a pet at home?", ["Yes or No", "I am a car", "I am a tree", "Never"], 0], ["What is your favorite cartoon character?", ["Spiderman / Mickey / Tom and Jerry", "A stone", "A wall", "Nothing"], 0], ["Can you count from 20 to 10? (Countdown)", ["Yes, I can", "No", "I am sleeping", "Goodbye"], 0], ["What do you usually wear to school?", ["School uniform", "Swimming suit", "Pajamas", "Winter coat only"], 0], ["How do you say 'باب' in English?", ["Door", "Window", "Wall", "Floor"], 0], ["How do you say 'نافذة/شباك' in English?", ["Window", "Door", "Table", "Bed"], 0], ["How do you say 'كرسي' in English?", ["Chair", "Desk", "Bag", "Pen"], 0], ["How do you say 'طاولة/مكتب' in English?", ["Table / Desk", "Chair", "Door", "Book"], 0], ["Do you like to draw and paint?", ["Yes, I love art", "No", "I don't know", "Never"], 0], ["Can you share your toys with your friends?", ["Yes, sharing is good", "No, never", "I hide them", "I break them"], 0], ["What do you say when you leave and say goodbye?", ["Goodbye / See you", "Good morning", "Hello", "Thank you"], 0], ["Are you ready to learn new things?", ["Yes, I am ready!", "No", "Maybe", "I want to sleep"], 0], ["Do you like listening to English stories?", ["Yes, very much", "No", "I hate stories", "I don't know"], 0], ["What is your favorite color among these?", ["Blue / Red / Green", "Stone color", "Mud", "Nothing"], 0], ["Do you wash your hands before eating?", ["Yes, always", "No", "I forget", "I don't eat"], 0], ["Do you brush your teeth every day?", ["Yes, I do", "No", "Never", "I don't have teeth"], 0], ["Are you a polite and kind boy?", ["Yes, I am", "No", "I don't know", "Maybe"], 0], ["Do you like making new friends?", ["Yes, I love making friends", "No", "I want to be alone", "No way"], 0], ["Are you proud of yourself?", ["Yes, I am!", "No", "Why?", "I am sleeping"], 0], ["What is 7 + 3?", ["9", "10", "11", "12"], 1], ["What is 12 - 5?", ["5", "6", "7", "8"], 2], ["What is 4 × 2?", ["6", "8", "10", "12"], 1], ["Which word means the opposite of 'fast'?", ["Slow", "Big", "Bright", "Young"], 0], ["Which animal says 'meow'?", ["Dog", "Cat", "Cow", "Horse"], 1], ["Which animal says 'woof'?", ["Cat", "Dog", "Bird", "Fish"], 1], ["Which planet do we live on?", ["Mars", "Earth", "Jupiter", "Venus"], 1], ["How many months are in a year?", ["10", "11", "12", "13"], 2], ["How many hours are in one day?", ["12", "18", "24", "30"], 2], ["Which is a vegetable?", ["Carrot", "Apple", "Banana", "Orange"], 0], ["Which one can you use to tell time?", ["Clock", "Spoon", "Shoe", "Pillow"], 0], ["What do bees make?", ["Honey", "Milk", "Bread", "Juice"], 0], ["Which season comes after winter?", ["Spring", "Summer", "Autumn", "Winter"], 0], ["What do you use to write on a blackboard?", ["Chalk", "Spoon", "Ball", "Cup"], 0], ["Which room is usually used for sleeping?", ["Bedroom", "Kitchen", "Garage", "Bathroom"], 0], ["What should you do when a traffic light is red?", ["Stop", "Run", "Dance", "Fly"], 0], ["Which is heavier: a car or a pencil?", ["A car", "A pencil", "They are the same", "Neither"], 0], ["Which word is a color?", ["Purple", "Happy", "Run", "Table"], 0], ["What is 10 + 10?", ["15", "20", "25", "30"], 1], ["Which animal has a long trunk?", ["Elephant", "Rabbit", "Cat", "Fish"], 0]];
+let quiz=[], current=0, score=0, chosen=[];
+
+function shuffle(arr) {
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  quiz=shuffle(BANK).map(q=>({
+    text:q[0],
+    options:shuffle(q[1].map((text,index)=>({text:text,index:index}))),
+    correct:q[2]
+  }));
+  current=0; score=0; chosen=[];
+  showQuestion();
+}
+
+function showQuestion() {
+  const q=quiz[current];
+  const app=document.getElementById('app');
+  let optionsHTML="";
+  q.options.forEach((o,i)=>{
+    const selected=chosen[current]===o.index ? " selected" : "";
+    optionsHTML += '<button type="button" class="option'+selected+'" data-index="'+o.index+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+escapeHTML(o.text)+'</span></button>';
+  });
+  const percent=Math.round((current/quiz.length)*100);
+  app.innerHTML =
+    '<h1>🌟 English Fun Quiz</h1>'+
+    '<div class="muted">English quiz for a 9-year-old</div>'+
+    '<div class="top"><span>Question '+(current+1)+' of '+quiz.length+'</span><span>Score: '+score+'</span></div>'+
+    '<div class="bar"><div class="fill" style="width:'+percent+'%"></div></div>'+
+    '<div class="question">'+escapeHTML(q.text)+'</div>'+
+    '<div class="hint">اختر الإجابة الصحيحة</div>'+
+    '<div id="options">'+optionsHTML+'</div>'+
+    '<div class="nav">'+
+      '<button type="button" class="back" id="back" '+(current===0?'disabled':'')+'>← Back</button>'+
+      '<button type="button" class="next" id="next" disabled>'+(current===quiz.length-1?'Finish':'Next →')+'</button>'+
+    '</div>';
+
+  document.querySelectorAll('.option').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      chosen[current]=Number(btn.dataset.index);
+      document.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('next').disabled=false;
+    });
+  });
+  document.getElementById('back').addEventListener('click',()=>{
+    if(current>0){current--;showQuestion();}
+  });
+  document.getElementById('next').addEventListener('click',()=>{
+    if(chosen[current]===undefined)return;
+    if(chosen[current]===q.correct)score++;
+    if(current===quiz.length-1)showResult(); else {current++;showQuestion();}
+  });
+}
+
+function showResult() {
+  const pct=Math.round(score/quiz.length*100);
+  let msg=pct>=90?'Excellent! 🌟':pct>=75?'Great job! 👏':pct>=60?'Good effort! 💪':'Keep practicing! 📚';
+  let review='<h3>Review</h3>';
+  quiz.forEach((q,i)=>{
+    if(chosen[i]!==q.correct){
+      const a=q.options.find(o=>o.index===chosen[i]);
+      const c=q.options.find(o=>o.index===q.correct);
+      review+='<div class="wrong"><b>'+(i+1)+'. '+escapeHTML(q.text)+'</b><br>Your answer: '+(a?escapeHTML(a.text):'—')+'<br><span class="correct">Correct answer: '+escapeHTML(c.text)+'</span></div>';
+    }
+  });
+  document.getElementById('app').innerHTML='<div class="result"><h1>🎉 Quiz Complete!</h1><div class="score">'+score+' / '+quiz.length+'</div><h2>'+pct+'% — '+msg+'</h2><button class="restart" type="button" onclick="startQuiz()">Try Again 🔄</button>'+review+'</div>';
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, function(ch) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+  });
+}
+
+startQuiz();
+</script>
+</body>
+</html>
